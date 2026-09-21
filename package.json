@@ -1,0 +1,35 @@
+{
+  "name": "supplier-duplicate-check-cap",
+  "version": "1.0.0",
+  "description": "SAP CAP (Node.js) service implementing the Supplier Duplication Validation step of the SLP internal-questionnaire approval flow.",
+  "main": "srv/server.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "build": "cds build --production",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@sap/cds": "^8",
+    "axios": "^1.7.4",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@cap-js/sqlite": "^1",
+    "@sap/cds-dk": "^8"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        }
+      }
+    }
+  }
+}
