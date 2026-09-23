@@ -85,8 +85,8 @@ function extractSupplierAnswers(taskDetails, labels) {
 // HTML <table> was tried and came through as literal markup, not a
 // rendered table. Plain-text/ASCII table it is.
 function buildMatchesTable(matches) {
-  const header = ['Supplier Name', 'Email'];
-  const rows = matches.map((m) => [m.name || 'Unknown name', m.email || 'no email on file']);
+  const header = ['Supplier Name', 'Email', 'ERP ID'];
+  const rows = matches.map((m) => [m.name || 'Unknown name', m.email || 'no email on file', m.erpVendorId || 'N/A']);
   const colWidths = header.map((h, i) => Math.max(h.length, ...rows.map((r) => r[i].length)));
 
   const formatRow = (row) => row.map((cell, i) => cell.padEnd(colWidths[i])).join(' | ');

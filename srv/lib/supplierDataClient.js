@@ -113,7 +113,8 @@ async function fetchCandidateSuppliers() {
       results.push({
         name: item['Supplier Name'] || '',
         email: item['Primary contact email'] || '',
-        smVendorId: item['SM Vendor ID'] || ''
+        smVendorId: item['SM Vendor ID'] || '',
+        erpVendorId: item['ERP Vendor ID'] || ''
       });
     }
 
