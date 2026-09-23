@@ -4,9 +4,9 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { OUTCOMES, normalizeName, normalizeEmail, evaluateDuplicate } = require('../srv/lib/matcher');
 
-test('normalizeName strips legal suffixes and punctuation', () => {
-  assert.equal(normalizeName('Acme Supplies, Ltd.'), 'acme supplies');
-  assert.equal(normalizeName('ACME SUPPLIES INC'), 'acme supplies');
+test('normalizeName strips punctuation but keeps legal suffixes', () => {
+  assert.equal(normalizeName('Acme Supplies, Ltd.'), 'acme supplies ltd');
+  assert.equal(normalizeName('ACME SUPPLIES INC'), 'acme supplies inc');
   assert.equal(normalizeName('  Acme   Supplies  '), 'acme supplies');
 });
 
@@ -16,7 +16,7 @@ test('normalizeEmail lowercases and trims', () => {
 
 test('evaluateDuplicate returns EXACT_MATCH when name and email both match', () => {
   const questionnaire = { name: 'Acme Supplies Ltd', email: 'contact@acme.com' };
-  const candidates = [{ name: 'Acme Supplies Inc', email: 'contact@acme.com' }];
+  const candidates = [{ name: 'Acme Supplies Ltd', email: 'contact@acme.com' }];
 
   const result = evaluateDuplicate(questionnaire, candidates);
   assert.equal(result.outcome, OUTCOMES.EXACT_MATCH);
@@ -33,10 +33,20 @@ test('evaluateDuplicate returns PARTIAL_MATCH when only email matches', () => {
 
 test('evaluateDuplicate returns PARTIAL_MATCH when only name matches', () => {
   const questionnaire = { name: 'Acme Supplies Ltd', email: 'new-contact@acme.com' };
-  const candidates = [{ name: 'Acme Supplies Inc', email: 'old-contact@acme.com' }];
+  const candidates = [{ name: 'Acme Supplies Ltd', email: 'old-contact@acme.com' }];
 
   const result = evaluateDuplicate(questionnaire, candidates);
   assert.equal(result.outcome, OUTCOMES.PARTIAL_MATCH);
+});
+
+test('evaluateDuplicate does not match names differing only by legal suffix', () => {
+  // Different legal entities sharing a base name (e.g. "Brainbox Consulting"
+  // vs "Brainbox Consulting Pvt Ltd") must NOT be treated as the same name.
+  const questionnaire = { name: 'Brainbox Consulting', email: 'a@x.com' };
+  const candidates = [{ name: 'Brainbox Consulting Pvt Ltd', email: 'b@x.com' }];
+
+  const result = evaluateDuplicate(questionnaire, candidates);
+  assert.equal(result.outcome, OUTCOMES.NO_MATCH);
 });
 
 test('evaluateDuplicate returns NO_MATCH when nothing overlaps', () => {

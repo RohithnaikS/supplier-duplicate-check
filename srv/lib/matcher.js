@@ -6,21 +6,16 @@ const OUTCOMES = {
   NO_MATCH: 'NO_MATCH'
 };
 
-const LEGAL_SUFFIXES = [
-  'ltd', 'limited', 'llc', 'llp', 'inc', 'incorporated', 'corp', 'corporation',
-  'co', 'company', 'gmbh', 'pvt', 'private', 'plc', 'sa', 'srl', 'bv', 'nv',
-  'ag', 'kg', 'pty'
-];
-
+// Legal-entity suffixes (Ltd, Pvt Ltd, Inc, ...) are treated as a meaningful
+// part of the name, not noise to strip -- "Brainbox Consulting" and
+// "Brainbox Consulting Pvt Ltd" are different entities and must NOT match.
 function normalizeName(rawName) {
   if (!rawName) return '';
   let n = rawName.toLowerCase().trim();
   n = n.replace(/[.,'&]/g, ' ');
   n = n.replace(/[^a-z0-9\s]/g, ' ');
   n = n.replace(/\s+/g, ' ').trim();
-
-  const tokens = n.split(' ').filter((t) => !LEGAL_SUFFIXES.includes(t));
-  return tokens.join(' ').trim();
+  return n;
 }
 
 function normalizeEmail(rawEmail) {

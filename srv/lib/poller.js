@@ -10,10 +10,19 @@ const log = cds.log('duplicate-check-poller');
 let timer = null;
 let ticking = false; // re-entrancy guard: don't overlap ticks if one runs long
 
+// If the local audit-log DB is unavailable (e.g. the native sqlite driver
+// blocked by a Windows Application Control policy), don't let that stop the
+// actual duplicate check and Ariba action from running -- degrade to
+// treating the task as not-yet-processed rather than aborting it entirely.
 async function alreadyProcessed(taskId) {
-  const { DuplicateCheckLog } = cds.entities('com.acme.slp');
-  const existing = await cds.run(SELECT.one.from(DuplicateCheckLog).where({ taskId }));
-  return !!existing;
+  try {
+    const { DuplicateCheckLog } = cds.entities('com.acme.slp');
+    const existing = await cds.run(SELECT.one.from(DuplicateCheckLog).where({ taskId }));
+    return !!existing;
+  } catch (err) {
+    log.warn('DuplicateCheckLog read failed, proceeding as not-yet-processed', { taskId, message: err.message });
+    return false;
+  }
 }
 
 async function logResult(result) {
