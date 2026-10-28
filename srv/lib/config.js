@@ -51,22 +51,9 @@ module.exports = {
   },
 
   s4: {
-    // Resolved by name via the SAP Cloud SDK's getDestination() at request
-    // time -- the Destination holds the URL and auth, not raw env creds.
-    destinationName: process.env.S4_DESTINATION_NAME,
-    // Local-dev-only shortcut: cds watch runs on a laptop, not inside BTP
-    // with this destination actually bound, so getDestination() has nothing
-    // to resolve against yet. When these are set, s4ValidationClient.js
-    // registers them as a local destination (the Cloud SDK's own documented
-    // "destinations" env var mechanism for testing without a destination
-    // service binding) so the same destinationName above still resolves.
-    // Drop these once this is deployed to BTP with a real bound destination.
-    local: {
-      url: process.env.S4_DESTINATION_URL,
-      username: process.env.S4_DESTINATION_USER,
-      password: process.env.S4_DESTINATION_PASSWORD,
-      sapClient: process.env.S4_DESTINATION_SAP_CLIENT
-    }
+    baseUrl: process.env.S4_VALIDATION_BASE_URL,
+    clientId: process.env.S4_VALIDATION_CLIENT_ID,
+    clientSecret: process.env.S4_VALIDATION_CLIENT_SECRET
   },
 
   matching: {

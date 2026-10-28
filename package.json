@@ -13,8 +13,6 @@
     "test": "node --test test/*.test.js"
   },
   "dependencies": {
-    "@sap-cloud-sdk/connectivity": "^3",
-    "@sap-cloud-sdk/http-client": "^3",
     "@sap/cds": "^8",
     "axios": "^1.7.4",
     "dotenv": "^16.4.5",

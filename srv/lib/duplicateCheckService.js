@@ -4,7 +4,6 @@ const cds = require('@sap/cds');
 const config = require('./config');
 const approvalClient = require('./aribaApprovalClient');
 const sdaClient = require('./supplierDataClient');
-const s4Client = require('./s4ValidationClient');
 const { OUTCOMES, evaluateDuplicate } = require('./matcher');
 
 const log = cds.log('duplicate-check');
@@ -126,22 +125,13 @@ async function runDuplicateCheck(taskId, labels, taskDetails) {
     log.warn('No supplier name/email found on questionnaire, skipping match', { taskId });
     outcome = OUTCOMES.NO_MATCH;
   } else {
-    const [aribaCandidates, s4Candidates] = await Promise.all([
-      sdaClient.fetchCandidateSuppliers().catch((err) => {
-        log.error('SDA candidate fetch failed', { taskId, message: err.message });
-        return [];
-      }),
-      s4Client.fetchCandidateSuppliers().catch((err) => {
-        log.error('S4 candidate fetch failed', { taskId, message: err.message });
-        return [];
-      })
-    ]);
-    // S4 has no placeholder-record problem (that's an Ariba SM Vendor
-    // quirk), so the ownSmVendorId self-exclusion only applies to Ariba's.
-    const filteredAribaCandidates = supplierAnswers.ownSmVendorId
-      ? aribaCandidates.filter((c) => c.smVendorId !== supplierAnswers.ownSmVendorId)
-      : aribaCandidates;
-    const candidates = [...filteredAribaCandidates, ...s4Candidates];
+    const allCandidates = await sdaClient.fetchCandidateSuppliers().catch((err) => {
+      log.error('SDA candidate fetch failed', { taskId, message: err.message });
+      return [];
+    });
+    const candidates = supplierAnswers.ownSmVendorId
+      ? allCandidates.filter((c) => c.smVendorId !== supplierAnswers.ownSmVendorId)
+      : allCandidates;
 
     ({ outcome, matches } = evaluateDuplicate(supplierAnswers, candidates));
 
